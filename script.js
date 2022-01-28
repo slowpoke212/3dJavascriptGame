@@ -1,5 +1,6 @@
 var res = 500
 var fov = 60
+var mapadd = 500
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
 var rays = []
@@ -63,7 +64,7 @@ function wall (x,y,w,h,color){//wall constructor
 walls.push(new wall(400,30,50,100, 'green'))
 walls.push(new wall(100, 400, 50, 100, 'blue'))
 
-walls.push(new wall(400, 30, 50, 100, 'green'))
+walls.push(new wall(250, 50, 250, 40, 'green'))
 walls.push(new wall(100, 400, 50, 100, 'blue'))
 window.addEventListener('keydown', function (e) {//keydown
   key = e.key//this is the key
@@ -78,12 +79,12 @@ window.addEventListener('keydown', function (e) {//keydown
 
 
 	if (key == "w"){
-		player.xmove = true
-		player.ymove = true
+		player.xmove = Math.sin(degtorad(player.direction)) * 5
+		player.ymove = Math.cos(degtorad(player.direction)) * 5
 	}
 	if (key == "s") {
-		player.xmoveback = true
-		player.ymoveback = true
+		player.xmove = Math.sin(degtorad(player.direction)) * -5
+		player.ymove = Math.cos(degtorad(player.direction)) * -5
 	}
 
 }, false);
@@ -99,8 +100,8 @@ window.addEventListener('keyup', function (e) {
 	player.xmove = 0
 	}
 	if (key == "s") {
-		player.xmoveback = 0
-		player.ymoveback = 0
+		player.xmove = 0
+		player.ymove = 0
 	}
 	if (keyup == "d"){
 	player.spinleft = false
@@ -120,32 +121,23 @@ function tick(){
 	
 	repeater1 = setTimeout(tick, 15);
 	
-	if (player.xmove == true){
-	player.xmove = Math.sin(degtorad(player.direction))*5
-	player.ymove = Math.cos(degtorad(player.direction))*5
+	
 	player.x += player.xmove
 	player.y += player.ymove
-	player.xmove = true
-	player.ymove = true
-	
+	for (i = 0; i < walls.length; i++) {//loops through all walls
+		while (isCollide(player, walls[i])) {
+			player.x -= player.xmove/4
+			player.y -= player.ymove /4
+		}
 	}
-	if (player.xmoveback == true) {
-		player.xmove = Math.sin(degtorad(player.direction)) * -5
-		player.ymove = Math.cos(degtorad(player.direction)) * -5
-		player.x += player.xmove
-		player.y += player.ymove
-		player.xmoveback = true
-		player.ymoveback = true
+		
 
-	}
 	if (player.spinleft == true){
 	player.direction+=4
-	//MAKE THEM DELETE WHEN THEY GET OFF SCREEN
 	
 	}
 	if (player.spinright == true){
 	player.direction-=4
-	//MAKE THEM DELETE WHEN THEY GET OFF SCREEN
 	
 	}
 	
@@ -166,12 +158,12 @@ function draw(){
 		while (rays[i].done != true) {
 		rays[i].x += rays[i].deltaX
 		rays[i].y += rays[i].deltaY
-		if (rays[i].x > c.width + 200 || rays[i].x < -200) {
+		if (rays[i].x > c.width + mapadd || rays[i].x < -mapadd) {
 			
 			rays[i].done = true
 			rays[i].missed = true
 		}
-		if (rays[i].y > c.height +200 || rays[i].y < -200) {
+		if (rays[i].y > c.height +mapadd || rays[i].y < -mapadd) {
 			rays[i].done = true
 			rays[i].missed = true
 		}
@@ -197,7 +189,8 @@ function draw(){
 
 
 	ctx.clearRect(0, 0, c.width, c.height)//clears canvas
-	
+	ctx.fillStyle = 'grey'
+	ctx.fillRect(0,c.height/2+10,c.width, c.height/2)
 	ctx.fillStyle = 'blue'//makes player blue
 	/*
 	ctx.fillRect(player.x-player.width/2,player.y-player.height/2,player.width,player.height)//renders player
